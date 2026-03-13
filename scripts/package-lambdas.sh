@@ -9,6 +9,8 @@ ROOT="$(repo_root)"
 DIST_DIR="$ROOT/dist/lambdas"
 PYTHON_BIN="${PYTHON_BIN:-$(resolve_command python3 || true)}"
 GO_BIN="${GO_BIN:-$(resolve_command go || true)}"
+MVN_BIN="${MVN_BIN:-$(resolve_command mvn || true)}"
+PHP_BIN="${PHP_BIN:-$(resolve_command php || true)}"
 NPM_BIN="${NPM_BIN:-$(resolve_command npm || true)}"
 
 if [[ -z "$PYTHON_BIN" ]]; then
@@ -17,6 +19,14 @@ fi
 
 if [[ -z "$GO_BIN" ]]; then
   fail "Go is required to package the Go Lambda"
+fi
+
+if [[ -z "$MVN_BIN" ]] && ! have_command powershell.exe; then
+  fail "Maven is required to package the Java Lambda"
+fi
+
+if [[ -z "$PHP_BIN" ]] && ! have_command powershell.exe; then
+  fail "PHP is required to package the PHP Lambda"
 fi
 
 if [[ -z "$NPM_BIN" ]]; then
@@ -83,7 +93,14 @@ zip_files "$DIST_DIR/go/function.zip" "$ROOT/lambdas/go/main"
 log "Packaging Java Lambda"
 (
   cd "$ROOT/lambdas/java"
-  powershell.exe -NoProfile -Command "mvn -q -DskipTests package" >/dev/null
+
+  if [[ -n "$MVN_BIN" ]] && "$MVN_BIN" -q -DskipTests package >/dev/null 2>&1; then
+    :
+  elif have_command powershell.exe; then
+    powershell.exe -NoProfile -Command "Set-Location '$(host_path "$ROOT/lambdas/java")'; mvn -q -DskipTests package" >/dev/null
+  else
+    fail "Unable to package Java Lambda with Maven"
+  fi
 )
 "$PYTHON_BIN" - "$ROOT/lambdas/java/target/lambda-java.jar" "$DIST_DIR/java/function.zip" <<'PY'
 import os
@@ -107,7 +124,15 @@ PY
 
 log "Packaging PHP Lambda runtime bundle"
 chmod +x "$ROOT/lambdas/php/bootstrap"
-powershell.exe -NoProfile -Command "php -l lambdas/php/handler.php" >/dev/null
+
+if [[ -n "$PHP_BIN" ]] && "$PHP_BIN" -l "$ROOT/lambdas/php/handler.php" >/dev/null 2>&1; then
+  :
+elif have_command powershell.exe; then
+  powershell.exe -NoProfile -Command "php -l '$(host_path "$ROOT/lambdas/php/handler.php")'" >/dev/null
+else
+  fail "Unable to validate PHP Lambda handler"
+fi
+
 zip_files "$DIST_DIR/php/function.zip" "$ROOT/lambdas/php/bootstrap" "$ROOT/lambdas/php/handler.php"
 
 rm -rf "$ROOT/lambdas/node-ts/node_modules" "$ROOT/lambdas/node-ts/build" "$ROOT/lambdas/java/target"

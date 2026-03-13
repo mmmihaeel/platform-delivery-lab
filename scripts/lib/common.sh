@@ -16,6 +16,22 @@ docker_mount_path() {
   printf '%s\n' "$path"
 }
 
+host_path() {
+  local path="$1"
+
+  if command -v wslpath >/dev/null 2>&1; then
+    wslpath -w "$path"
+    return
+  fi
+
+  if command -v cygpath >/dev/null 2>&1; then
+    cygpath -w "$path"
+    return
+  fi
+
+  printf '%s\n' "$path"
+}
+
 log() {
   printf '[platform-delivery-lab] %s\n' "$*"
 }

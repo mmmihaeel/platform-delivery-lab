@@ -1,0 +1,1 @@
+{"proxy":"apache","routes":{"php":"/php","java":"/java","legacyPhp":"/legacy/php","legacyJava":"/legacy/java","status":"/server-status"}}

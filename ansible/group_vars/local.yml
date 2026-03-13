@@ -1,0 +1,11 @@
+repo_root: "{{ playbook_dir | dirname | dirname }}"
+bootstrap_directories:
+  - "{{ repo_root }}/dist/lambdas"
+  - "{{ repo_root }}/tmp/localstack"
+  - "{{ repo_root }}/tmp/kind"
+required_repository_files:
+  - "{{ repo_root }}/docker-compose.yml"
+  - "{{ repo_root }}/Makefile"
+  - "{{ repo_root }}/infra/terraform/localstack/main.tf"
+  - "{{ repo_root }}/k8s/overlays/local/kustomization.yaml"
+  - "{{ repo_root }}/docs/architecture.md"

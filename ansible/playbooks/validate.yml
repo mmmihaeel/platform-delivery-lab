@@ -1,0 +1,27 @@
+---
+- name: Validate repository control files
+  hosts: local
+  gather_facts: false
+  vars_files:
+    - ../group_vars/local.yml
+  tasks:
+    - name: Verify documentation and automation entrypoints exist
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop:
+        - "{{ repo_root }}/README.md"
+        - "{{ repo_root }}/docs/topology.md"
+        - "{{ repo_root }}/docs/runbooks.md"
+        - "{{ repo_root }}/scripts/lint.sh"
+        - "{{ repo_root }}/scripts/smoke-test.sh"
+      register: validation_contract
+
+    - name: Assert the repository control files are present
+      ansible.builtin.assert:
+        that:
+          - validation_contract.results | map(attribute='stat.exists') | min
+        fail_msg: "One or more repository control files are missing."
+
+    - name: Report validation contract status
+      ansible.builtin.debug:
+        msg: "Repository control files are present and ready for the scripted validation flow."

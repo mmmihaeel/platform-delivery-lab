@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: platform-delivery-lab
+  labels:
+    app.kubernetes.io/name: platform-delivery-lab
+    app.kubernetes.io/part-of: platform-delivery-lab

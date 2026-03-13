@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-app
+  namespace: platform-delivery-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: php-app
+  template:
+    metadata:
+      labels:
+        app: php-app
+    spec:
+      containers:
+        - name: php-app
+          image: platform-delivery-lab/php:dev
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: platform-config
+            - secretRef:
+                name: platform-secrets
+          env:
+            - name: SERVICE_NAME
+              value: php-runtime-api
+            - name: SERVICE_RUNTIME
+              value: php8.3
+            - name: SERVICE_VERSION
+              valueFrom:
+                configMapKeyRef:
+                  name: platform-config
+                  key: PLATFORM_VERSION
+            - name: PORT
+              value: "3010"
+          ports:
+            - containerPort: 3010
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi

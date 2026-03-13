@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: java-app
+  namespace: platform-delivery-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: java-app
+  template:
+    metadata:
+      labels:
+        app: java-app
+    spec:
+      containers:
+        - name: java-app
+          image: platform-delivery-lab/java:dev
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: platform-config
+            - secretRef:
+                name: platform-secrets
+          env:
+            - name: SERVICE_NAME
+              value: java-runtime-api
+            - name: SERVICE_RUNTIME
+              value: java11
+            - name: SERVICE_VERSION
+              valueFrom:
+                configMapKeyRef:
+                  name: platform-config
+                  key: PLATFORM_VERSION
+            - name: PORT
+              value: "3009"
+          ports:
+            - containerPort: 3009
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          resources:
+            requests:
+              cpu: 25m
+              memory: 96Mi
+            limits:
+              cpu: 150m
+              memory: 192Mi

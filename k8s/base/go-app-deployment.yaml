@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: go-app
+  namespace: platform-delivery-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: go-app
+  template:
+    metadata:
+      labels:
+        app: go-app
+    spec:
+      containers:
+        - name: go-app
+          image: platform-delivery-lab/go:dev
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: platform-config
+            - secretRef:
+                name: platform-secrets
+          env:
+            - name: SERVICE_NAME
+              value: go-runtime-api
+            - name: SERVICE_RUNTIME
+              value: go
+            - name: SERVICE_VERSION
+              valueFrom:
+                configMapKeyRef:
+                  name: platform-config
+                  key: PLATFORM_VERSION
+            - name: PORT
+              value: "3008"
+          ports:
+            - containerPort: 3008
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi

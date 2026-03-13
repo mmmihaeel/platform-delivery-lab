@@ -1,0 +1,41 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: platform-delivery-lab
+  namespace: platform-delivery-lab
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "30"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: platform-delivery-lab.local
+      http:
+        paths:
+          - path: /node
+            pathType: Prefix
+            backend:
+              service:
+                name: node-app
+                port:
+                  number: 80
+          - path: /go
+            pathType: Prefix
+            backend:
+              service:
+                name: go-app
+                port:
+                  number: 80
+          - path: /java
+            pathType: Prefix
+            backend:
+              service:
+                name: java-app
+                port:
+                  number: 80
+          - path: /php
+            pathType: Prefix
+            backend:
+              service:
+                name: php-app
+                port:
+                  number: 80

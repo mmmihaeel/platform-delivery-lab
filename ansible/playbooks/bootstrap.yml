@@ -1,0 +1,45 @@
+---
+- name: Bootstrap the platform delivery lab workspace
+  hosts: local
+  gather_facts: false
+  vars_files:
+    - ../group_vars/local.yml
+  tasks:
+    - name: Ensure workspace directories exist
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0755"
+      loop: "{{ bootstrap_directories }}"
+
+    - name: Check whether the environment file already exists
+      ansible.builtin.stat:
+        path: "{{ repo_root }}/.env"
+      register: env_file
+
+    - name: Seed the local environment file from the example
+      ansible.builtin.copy:
+        src: "{{ repo_root }}/.env.example"
+        dest: "{{ repo_root }}/.env"
+        mode: "0644"
+        remote_src: true
+      when: not env_file.stat.exists
+
+    - name: Verify the repository contract files exist
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop: "{{ required_repository_files }}"
+      register: repo_contract
+
+    - name: Fail when required repository files are missing
+      ansible.builtin.assert:
+        that:
+          - repo_contract.results | map(attribute='stat.exists') | min
+        fail_msg: "Repository bootstrap contract is incomplete."
+
+    - name: Summarize the prepared workspace
+      ansible.builtin.debug:
+        msg:
+          - "Workspace root: {{ repo_root }}"
+          - "Environment file: {{ repo_root }}/.env"
+          - "Workspace directories: {{ bootstrap_directories | join(', ') }}"

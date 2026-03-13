@@ -1,0 +1,14 @@
+#!/bin/sh
+set -eu
+
+runtime_api="${AWS_LAMBDA_RUNTIME_API:-127.0.0.1:9001}"
+handler_script="${LAMBDA_TASK_ROOT:-.}/handler.php"
+
+while true; do
+  headers="$(mktemp)"
+  event="$(curl -sS -D "$headers" "http://${runtime_api}/2018-06-01/runtime/invocation/next")"
+  request_id="$(tr -d '\r' < "$headers" | awk -F': ' '/Lambda-Runtime-Aws-Request-Id/ {print $2}')"
+  response="$(printf '%s' "$event" | php "$handler_script")"
+  curl -sS -X POST "http://${runtime_api}/2018-06-01/runtime/invocation/${request_id}/response" -d "$response" >/dev/null
+  rm -f "$headers"
+done

@@ -1,0 +1,55 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare environment
+        run: cp -n .env.example .env || true
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.14.1
+
+      - name: Run validation suite
+        run: make validate
+
+  integration:
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare environment
+        run: cp -n .env.example .env || true
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.14.1
+
+      - name: Start local platform
+        run: make up
+
+      - name: Smoke the platform
+        run: make smoke
+
+      - name: Deploy LocalStack functions
+        run: make tf-apply-localstack
+
+      - name: Invoke LocalStack functions
+        run: make lambda-smoke
+
+      - name: Tear down platform
+        if: always()
+        run: make down

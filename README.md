@@ -36,11 +36,21 @@ The result is a portfolio repository that reads like a compact internal platform
 
 ## Platform Topology
 
-<p align="center">
-  <img src="assets/readme/topology.svg" alt="platform topology diagram" width="100%" />
-</p>
-
 The Docker Compose stack is the default execution surface. Nginx is the primary edge on `:8085`, Apache owns the Java and PHP slice on `:8086`, and the four services remain directly reachable on loopback-only ports for diagnostics and smoke validation. LocalStack runs on `:4566` and is the executable serverless control plane for the Terraform path.
+
+```mermaid
+flowchart LR
+    O["Operator flow<br/>Make / Bash / Ansible"] --> C["Compose stack"]
+    C --> N["Nginx<br/>:8085"]
+    N --> NODE["Node app<br/>:3007"]
+    N --> GO["Go app<br/>:3008"]
+    N --> A["Apache<br/>:8086"]
+    A --> JAVA["Java app<br/>:3009"]
+    A --> PHP["PHP app<br/>:3010"]
+    O --> T["Terraform"]
+    T --> L["LocalStack<br/>:4566"]
+    K["Kubernetes path<br/>kind + local overlay"] -. parallel local path .-> C
+```
 
 | Layer | Components | Responsibility |
 | --- | --- | --- |
@@ -67,10 +77,6 @@ The Docker Compose stack is the default execution surface. Nginx is the primary 
 | Smoke and validation workflows | [scripts/](scripts) | `make validate`, `make smoke`, `make lambda-smoke` | Bash-driven contract checks |
 
 ## Runtime Coverage
-
-<p align="center">
-  <img src="assets/readme/runtime-matrix.svg" alt="runtime coverage overview" width="100%" />
-</p>
 
 | Workload | Runtime | Location | Default local path | Routed path | Kubernetes path | LocalStack status |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -124,11 +130,16 @@ The repository is designed so the local operator flow and the CI flow follow the
 
 ## CI/CD
 
-<p align="center">
-  <img src="assets/readme/pipeline-flow.svg" alt="pipeline flow diagram" width="100%" />
-</p>
-
 The repository uses two CI definitions with matching intent:
+
+```mermaid
+flowchart LR
+    V["Validate<br/>make validate"] --> U["Start platform<br/>make up"]
+    U --> S["Smoke checks<br/>make smoke"]
+    S --> T["Apply LocalStack<br/>make tf-apply-localstack"]
+    T --> L["Lambda smoke<br/>make lambda-smoke"]
+    L --> D["Tear down<br/>make down"]
+```
 
 | System | Role | What it validates |
 | --- | --- | --- |

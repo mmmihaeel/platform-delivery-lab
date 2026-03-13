@@ -2,9 +2,16 @@
 
 ## Overview
 
-![Pipeline flow](../assets/readme/pipeline-flow.svg)
-
 The repository uses two CI systems, both aligned to the same local-first workflow. Neither pipeline is a production deployment pipeline. Both are validation and integration pipelines for an ephemeral runtime environment inside the CI runner.
+
+```mermaid
+flowchart LR
+    V["Validate"] --> U["Compose up"]
+    U --> S["Smoke"]
+    S --> T["Terraform apply"]
+    T --> L["Lambda smoke"]
+    L --> D["Tear down"]
+```
 
 ## GitHub Actions
 

@@ -2,12 +2,24 @@
 
 ## Overview
 
-![Platform topology](../assets/readme/topology.svg)
-
 The runtime topology has two primary characteristics:
 
 - Docker Compose is the default platform surface.
 - Traffic flows through one deliberate proxy chain: Nginx at the edge, Apache for the Java and PHP slice.
+
+```mermaid
+flowchart LR
+    O["Operator flow"] --> C["Compose stack"]
+    C --> N["Nginx :8085"]
+    N --> NODE["Node :3007"]
+    N --> GO["Go :3008"]
+    N --> A["Apache :8086"]
+    A --> JAVA["Java :3009"]
+    A --> PHP["PHP :3010"]
+    O --> T["Terraform"]
+    T --> L["LocalStack :4566"]
+    K["kind path"] -. local cluster route .-> C
+```
 
 ## Service map
 

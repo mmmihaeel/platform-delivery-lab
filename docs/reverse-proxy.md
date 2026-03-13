@@ -1,8 +1,17 @@
 # Reverse Proxy
 
-## Nginx
+## Summary
 
-Nginx is the default edge gateway. It terminates the public local routes on `:8085` and owns:
+The proxy layer is intentionally two-tier:
+
+- Nginx is the edge gateway
+- Apache owns the Java and PHP runtime slice plus server diagnostics
+
+That split makes the routing model clear and gives the repository a stronger traffic story than a single catch-all proxy.
+
+## Nginx responsibilities
+
+Nginx listens on `:8085` and owns:
 
 - `/healthz`
 - `/diagnostics/routes`
@@ -11,9 +20,9 @@ Nginx is the default edge gateway. It terminates the public local routes on `:80
 - `/legacy/*`
 - `/diagnostics/apache-status`
 
-The `/legacy/*` path is intentionally chained through Apache so the platform has one clear ingress tier and one downstream runtime-specific tier.
+`/legacy/*` is deliberately chained through Apache.
 
-## Apache
+## Apache responsibilities
 
 Apache listens on `:8086` and owns:
 
@@ -25,14 +34,29 @@ Apache listens on `:8086` and owns:
 - `/legacy/java/*`
 - `/server-status`
 
-Apache is where the Java and PHP runtime slice lives. That keeps the routing split deliberate:
+## Route model
 
-- Nginx: edge concerns and direct Node/Go routes
-- Apache: runtime slice, legacy path handling, diagnostics
+| Route | Traffic path |
+| --- | --- |
+| `/api/node/*` | Nginx -> Node |
+| `/api/go/*` | Nginx -> Go |
+| `/legacy/php/*` | Nginx -> Apache -> PHP |
+| `/legacy/java/*` | Nginx -> Apache -> Java |
+| `/php/*` | Apache -> PHP |
+| `/java/*` | Apache -> Java |
+| `/diagnostics/apache-status` | Nginx -> Apache `server-status` |
 
-## Diagnostic flow
+## Diagnostics
 
-- `http://127.0.0.1:8085/diagnostics/routes`
-- `http://127.0.0.1:8085/diagnostics/apache-status?auto`
-- `http://127.0.0.1:8086/routes`
-- `http://127.0.0.1:8086/server-status?auto`
+| Endpoint | Purpose |
+| --- | --- |
+| `http://127.0.0.1:8085/diagnostics/routes` | Nginx route map |
+| `http://127.0.0.1:8085/diagnostics/apache-status?auto` | Apache status through Nginx |
+| `http://127.0.0.1:8086/routes` | Apache route map |
+| `http://127.0.0.1:8086/server-status?auto` | Direct Apache status |
+
+## Related documents
+
+- [topology.md](topology.md)
+- [runbooks.md](runbooks.md)
+- [quickstart.md](quickstart.md)

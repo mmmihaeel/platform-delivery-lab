@@ -1,58 +1,70 @@
 # Architecture
 
-## Platform shape
+## Summary
 
-The repository models a compact local platform with four runtime services and one serverless control plane:
+`platform-delivery-lab` models a compact local platform with four application runtimes, two reverse proxies, one executable LocalStack-backed Terraform path, a local Kubernetes path, and a delivery layer that mirrors the same operator workflow in CI.
 
-- Node.js/TypeScript service
-- Go service
-- Java service
-- PHP service
-- LocalStack-backed Lambda workloads
+The repository is intentionally local-first. It is designed to show packaging discipline, routing design, infrastructure structure, and validation quality without implying managed-cloud deployment.
 
-The goal is not to simulate a full production estate. The goal is to show how a platform engineer packages and operates multiple runtimes with consistent entrypoints, validation, routing, and infrastructure structure.
+## Platform layers
+
+| Layer | Components | Design intent |
+| --- | --- | --- |
+| Operator interface | Make, Bash, Ansible | Keep the default workflow discoverable and reproducible |
+| Runtime platform | Docker Compose, Nginx, Apache, Node, Go, Java, PHP | Provide one reviewable local runtime surface with direct and proxied paths |
+| Serverless path | LocalStack, Terraform, Lambda packages | Demonstrate packaging and deployment structure without paid AWS usage |
+| Kubernetes path | k8s manifests, Kustomize overlay, kind | Show a clean local cluster path alongside Compose |
+| Delivery layer | GitHub Actions, Azure DevOps | Reuse the same local-first controls in CI |
 
 ## Design decisions
 
 ### Local-first by default
 
-Every default workflow runs on a developer workstation through Docker, LocalStack, or a local Kubernetes cluster. The repository avoids cloud-only setup and does not claim live managed environments.
+Every default path runs on a workstation or inside a CI runner through Docker, LocalStack, or a kind cluster. The repository does not depend on a paid cloud account for its executable workflows.
 
-### Two-tier reverse proxy model
+### Deliberate reverse proxy split
 
-Nginx is the default edge entrypoint. Apache owns the Java and PHP slice and exposes server diagnostics. Nginx forwards the legacy routes into Apache, which makes both proxies part of one traffic story instead of parallel decorations.
+Nginx is the primary edge tier. Apache owns the Java and PHP runtime slice and exposes proxy diagnostics. That makes both proxies part of one traffic story instead of parallel examples.
 
 ### Shared runtime contract
 
-Every service exposes:
+Each demo service exposes:
 
 - `/healthz`
 - `/status`
-- JSON metadata for service name, runtime, version, environment, request path, and forwarded headers
+- consistent JSON metadata for service name, runtime, environment, and request context
 
-That shared contract keeps smoke tests and docs consistent across runtimes.
+The shared contract keeps smoke checks, docs, and reviewer expectations aligned across all four runtimes.
 
 ### Executable versus reference infrastructure
 
-The Terraform layout separates real execution from reference architecture:
+The Terraform layout distinguishes between:
 
-- `infra/terraform/localstack` is executable and validated
-- `infra/terraform/aws`, `azure`, and `gcp` are reference-grade structures using the same naming inputs
+- executable infrastructure under `infra/terraform/localstack`
+- reference architecture layouts under `infra/terraform/aws`, `infra/terraform/azure`, and `infra/terraform/gcp`
 
-### Explicit packaging boundaries for Lambda
+That split keeps the repository honest. Reviewers can inspect cross-cloud structure without the documentation overstating what the repository applies by default.
 
-All four Lambda runtimes are built locally. Node and Java are part of the default LocalStack invoke path. Go and PHP remain packaged artifacts in the default workflow because their LocalStack execution behavior is less stable on this host profile than the Node and Java paths.
+### Explicit Lambda execution boundary
 
-## Operational layers
+All four Lambda runtimes are packaged locally. Node and Java are part of the default LocalStack deploy and invoke path. Go and PHP remain part of the packaging story without being presented as a larger default LocalStack execution matrix than the local environment consistently supports.
 
-### Bash and Make
+## Execution boundaries
 
-Bash scripts implement the operator workflows and Make keeps them discoverable.
+| Area | Default status |
+| --- | --- |
+| Docker Compose platform | Executable |
+| Reverse proxy routing | Executable |
+| LocalStack Lambda packaging | Executable |
+| LocalStack Terraform apply | Executable |
+| Kubernetes render path | Executable |
+| kind-based cluster path | Executable when kind is available |
+| AWS / Azure / GCP Terraform layouts | Reference only |
 
-### Ansible
+## Related documents
 
-Ansible prepares the workspace and verifies the repository contract.
-
-### CI/CD
-
-GitHub Actions and Azure DevOps call the same local-first validation flow used on a workstation.
+- [quickstart.md](quickstart.md)
+- [topology.md](topology.md)
+- [reverse-proxy.md](reverse-proxy.md)
+- [terraform.md](terraform.md)
+- [ci-cd.md](ci-cd.md)

@@ -1,0 +1,63 @@
+<svg width="1280" height="640" viewBox="0 0 1280 640" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="640" rx="28" fill="#0B1220"/>
+  <rect x="24" y="24" width="1232" height="592" rx="22" fill="#111827" stroke="#334155"/>
+  <rect x="64" y="64" width="320" height="180" rx="18" fill="#0F172A" stroke="#1E293B"/>
+  <rect x="410" y="64" width="360" height="180" rx="18" fill="#0F172A" stroke="#1E293B"/>
+  <rect x="796" y="64" width="420" height="180" rx="18" fill="#0F172A" stroke="#1E293B"/>
+  <rect x="64" y="276" width="1152" height="290" rx="20" fill="#0B1325" stroke="#1E293B"/>
+
+  <text x="72" y="108" fill="#E5E7EB" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">platform-delivery-lab</text>
+  <text x="72" y="146" fill="#93C5FD" font-family="Segoe UI, Arial, sans-serif" font-size="44" font-weight="700">Local-first platform delivery</text>
+  <text x="72" y="184" fill="#CBD5E1" font-family="Segoe UI, Arial, sans-serif" font-size="20">Multi-runtime services, reverse proxies, LocalStack Lambda, Kubernetes, Terraform,</text>
+  <text x="72" y="212" fill="#CBD5E1" font-family="Segoe UI, Arial, sans-serif" font-size="20">Ansible, Bash, and CI pipelines aligned around one reviewable operator flow.</text>
+
+  <text x="88" y="94" fill="#F8FAFC" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700">Edge Layer</text>
+  <rect x="88" y="118" width="118" height="40" rx="12" fill="#0F766E"/>
+  <text x="121" y="143" fill="#ECFEFF" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700">Nginx</text>
+  <rect x="220" y="118" width="130" height="40" rx="12" fill="#7C2D12"/>
+  <text x="258" y="143" fill="#FFF7ED" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700">Apache</text>
+  <text x="88" y="190" fill="#94A3B8" font-family="Segoe UI, Arial, sans-serif" font-size="15">Primary ingress, runtime slice routing, diagnostics.</text>
+
+  <text x="434" y="94" fill="#F8FAFC" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700">Runtime Layer</text>
+  <rect x="434" y="118" width="72" height="40" rx="12" fill="#1D4ED8"/><text x="454" y="143" fill="#EFF6FF" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700">Node</text>
+  <rect x="520" y="118" width="62" height="40" rx="12" fill="#065F46"/><text x="540" y="143" fill="#ECFDF5" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700">Go</text>
+  <rect x="596" y="118" width="72" height="40" rx="12" fill="#92400E"/><text x="618" y="143" fill="#FFFBEB" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700">Java</text>
+  <rect x="682" y="118" width="58" height="40" rx="12" fill="#7C3AED"/><text x="700" y="143" fill="#F5F3FF" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700">PHP</text>
+  <text x="434" y="190" fill="#94A3B8" font-family="Segoe UI, Arial, sans-serif" font-size="15">Shared health/status contract across four packaged services.</text>
+
+  <text x="820" y="94" fill="#F8FAFC" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700">Delivery and Infrastructure</text>
+  <rect x="820" y="118" width="124" height="40" rx="12" fill="#1D4ED8"/><text x="844" y="143" fill="#EFF6FF" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700">Terraform</text>
+  <rect x="958" y="118" width="126" height="40" rx="12" fill="#0F766E"/><text x="982" y="143" fill="#ECFEFF" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700">LocalStack</text>
+  <rect x="1098" y="118" width="88" height="40" rx="12" fill="#334155"/><text x="1120" y="143" fill="#F8FAFC" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="700">kind</text>
+  <text x="820" y="190" fill="#94A3B8" font-family="Segoe UI, Arial, sans-serif" font-size="15">Executable local Terraform path plus reviewable Kubernetes and CI flows.</text>
+
+  <text x="88" y="316" fill="#F8FAFC" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700">Platform Flow</text>
+
+  <rect x="88" y="348" width="164" height="72" rx="14" fill="#0F172A" stroke="#1D4ED8"/>
+  <text x="121" y="376" fill="#F8FAFC" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700">Operator Entry</text>
+  <text x="123" y="401" fill="#93C5FD" font-family="Segoe UI, Arial, sans-serif" font-size="14">Make • Bash • Ansible</text>
+
+  <rect x="302" y="348" width="176" height="72" rx="14" fill="#0F172A" stroke="#0F766E"/>
+  <text x="341" y="376" fill="#F8FAFC" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700">Compose Stack</text>
+  <text x="328" y="401" fill="#99F6E4" font-family="Segoe UI, Arial, sans-serif" font-size="14">Nginx • Apache • Apps • LocalStack</text>
+
+  <rect x="528" y="348" width="168" height="72" rx="14" fill="#0F172A" stroke="#7C3AED"/>
+  <text x="566" y="376" fill="#F8FAFC" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700">Validation</text>
+  <text x="551" y="401" fill="#DDD6FE" font-family="Segoe UI, Arial, sans-serif" font-size="14">Smoke • Terraform • Lambda</text>
+
+  <rect x="746" y="348" width="174" height="72" rx="14" fill="#0F172A" stroke="#7C2D12"/>
+  <text x="783" y="376" fill="#F8FAFC" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700">Kubernetes Path</text>
+  <text x="792" y="401" fill="#FED7AA" font-family="Segoe UI, Arial, sans-serif" font-size="14">Kustomize • kind • ingress</text>
+
+  <rect x="970" y="348" width="196" height="72" rx="14" fill="#0F172A" stroke="#334155"/>
+  <text x="1004" y="376" fill="#F8FAFC" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="700">CI Parity</text>
+  <text x="1004" y="401" fill="#CBD5E1" font-family="Segoe UI, Arial, sans-serif" font-size="14">GitHub Actions • Azure DevOps</text>
+
+  <path d="M252 384H302" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+  <path d="M478 384H528" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+  <path d="M696 384H746" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+  <path d="M920 384H970" stroke="#475569" stroke-width="3" stroke-linecap="round"/>
+
+  <text x="88" y="470" fill="#E2E8F0" font-family="Segoe UI, Arial, sans-serif" font-size="16">Flagship goals: packaging discipline, operational clarity, reproducible local validation, and credible platform breadth.</text>
+  <text x="88" y="510" fill="#64748B" font-family="Segoe UI, Arial, sans-serif" font-size="14">No managed cloud claim. No decorative filler. One coherent platform story.</text>
+</svg>

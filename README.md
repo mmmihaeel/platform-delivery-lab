@@ -1,61 +1,91 @@
 # platform-delivery-lab
 
-`platform-delivery-lab` is a local-first platform engineering repository that packages four runtime services, routes them through Nginx and Apache, deploys Lambda workloads into LocalStack with Terraform, validates a Kubernetes path for kind, and wraps the operator flow with Make, Bash, Ansible, GitHub Actions, and Azure DevOps.
+<p align="center">
+  <img src="assets/readme/hero.svg" alt="platform-delivery-lab overview" width="100%" />
+</p>
 
-## Why this repository exists
+<p align="center">
+  A local-first platform engineering lab for packaging, routing, validating, and operating multi-runtime services and Lambda workloads without relying on paid cloud accounts.
+</p>
 
-The project shows how to package, route, validate, and operate a small multi-runtime platform without depending on paid cloud accounts. It is scoped for a portfolio repository, but every visible workflow is built to be runnable, reviewable, and operationally coherent.
+## Quick Navigation
 
-## Feature highlights
+- [Why It Matters](#why-it-matters)
+- [Platform Topology](#platform-topology)
+- [Capability Matrix](#capability-matrix)
+- [Runtime Coverage](#runtime-coverage)
+- [Local Workflow](#local-workflow)
+- [CI/CD](#cicd)
+- [Repository Structure](#repository-structure)
+- [Docs Map](#docs-map)
+- [Scope Boundaries](#scope-boundaries)
+- [Future Improvements](#future-improvements)
 
-- Multi-service Docker packaging for Node.js/TypeScript, Go, Java, and PHP workloads
-- Primary edge routing through Nginx, with Apache handling the Java and PHP slice plus diagnostics
-- LocalStack-backed Lambda packaging across Node.js/TypeScript, Go, Java, and PHP
-- Executable Terraform stack for LocalStack, plus AWS, Azure, and GCP reference layouts
-- Kubernetes base and local overlay structure for kind-based local deployment
-- Ansible bootstrap workflow for workspace preparation and repository contract checks
-- Make and Bash as the primary operator interface
-- Validation pipelines in both GitHub Actions and Azure DevOps
+## Why It Matters
 
-## Technology stack
+`platform-delivery-lab` is built to show one coherent platform story rather than a loose collection of tools. The repository demonstrates how to:
 
-- Docker and Docker Compose
-- Nginx and Apache HTTP Server
-- Kubernetes and kind
-- Terraform
-- Ansible
-- LocalStack
-- Make
-- Bash
-- GitHub Actions
-- Azure DevOps
+- package four application runtimes behind a clean local platform boundary
+- route traffic intentionally with both Nginx and Apache
+- validate a Kubernetes path without pretending to ship managed-cloud infrastructure
+- structure Terraform so the executable path is real and the reference paths are still reviewable
+- automate the operator workflow with Bash, Make, Ansible, GitHub Actions, and Azure DevOps
+- package Lambda workloads across Node.js, Go, Java, and PHP through a LocalStack-first contract
 
-## Architecture summary
+The result is a portfolio repository that reads like a compact internal platform lab: opinionated, runnable, and easy to audit.
 
-The Compose stack exposes four runtime services directly on loopback-only ports for diagnostics and through two reverse proxies for routed access. Nginx is the default edge entrypoint on `:8085`; it owns the Node and Go paths and forwards the legacy path family to Apache. Apache listens on `:8086`, terminates the Java and PHP routes, and exposes `server-status` for diagnostics.
+## Platform Topology
 
-The infrastructure story is deliberately split into executable and reference layers. `infra/terraform/localstack` provisions a real LocalStack Lambda stack. `infra/terraform/aws`, `azure`, and `gcp` keep the same naming and variable conventions but remain reference-grade layouts. The Kubernetes path follows the same principle: manifests are valid, local-first, and kind-oriented, but they do not claim a managed-cloud deployment.
+<p align="center">
+  <img src="assets/readme/topology.svg" alt="platform topology diagram" width="100%" />
+</p>
 
-## Local topology
+The Docker Compose stack is the default execution surface. Nginx is the primary edge on `:8085`, Apache owns the Java and PHP slice on `:8086`, and the four services remain directly reachable on loopback-only ports for diagnostics and smoke validation. LocalStack runs on `:4566` and is the executable serverless control plane for the Terraform path.
 
-| Surface | Endpoint | Purpose |
+| Layer | Components | Responsibility |
 | --- | --- | --- |
-| Nginx | `http://127.0.0.1:8085/healthz` | Edge gateway health |
-| Nginx | `http://127.0.0.1:8085/api/node/status` | Node service through Nginx |
-| Nginx | `http://127.0.0.1:8085/api/go/status` | Go service through Nginx |
-| Nginx | `http://127.0.0.1:8085/legacy/php/status` | PHP service through Apache via Nginx |
-| Nginx | `http://127.0.0.1:8085/legacy/java/status` | Java service through Apache via Nginx |
-| Apache | `http://127.0.0.1:8086/healthz` | Apache health |
-| Apache | `http://127.0.0.1:8086/php/status` | PHP service through Apache |
-| Apache | `http://127.0.0.1:8086/java/status` | Java service through Apache |
-| Apache | `http://127.0.0.1:8086/server-status?auto` | Apache diagnostics |
-| Direct service | `http://127.0.0.1:3007/status` | Node runtime API |
-| Direct service | `http://127.0.0.1:3008/status` | Go runtime API |
-| Direct service | `http://127.0.0.1:3009/status` | Java runtime API |
-| Direct service | `http://127.0.0.1:3010/status` | PHP runtime API |
-| LocalStack | `http://127.0.0.1:4566/_localstack/health` | LocalStack control plane |
+| Edge | Nginx | Default entrypoint, Node and Go routing, Apache diagnostics passthrough |
+| Runtime slice | Apache | Java and PHP routing, legacy path handling, `server-status` diagnostics |
+| Services | Node.js/TypeScript, Go, Java, PHP | Shared `/healthz` and `/status` contract across four runtimes |
+| Serverless | LocalStack, Terraform | Local Lambda/IAM/logs path without paid AWS usage |
+| Automation | Make, Bash, Ansible | Operator entrypoints, bootstrap, validation, packaging |
+| Delivery | GitHub Actions, Azure DevOps | Validation parity for the same local-first workflow |
+| Kubernetes path | kind, Kustomize, ingress | Reviewable local cluster path aligned to the runtime topology |
 
-## Quickstart
+## Capability Matrix
+
+| Capability | Implementation path | Primary entrypoint | Validation signal |
+| --- | --- | --- | --- |
+| Docker runtime | [docker-compose.yml](docker-compose.yml) | `make up` | Service healthchecks and `make smoke` |
+| Reverse proxy routing | [docker/nginx/default.conf](docker/nginx/default.conf), [docker/apache/vhosts/default.conf](docker/apache/vhosts/default.conf) | `make smoke` | Direct and proxied endpoint assertions |
+| Kubernetes path | [k8s/](k8s) | `make k8s-validate`, `make k8s-apply` | Kustomize render validation and kind apply path |
+| Terraform path | [infra/terraform/localstack](infra/terraform/localstack) | `make tf-validate`, `make tf-apply-localstack` | Executable LocalStack provider flow |
+| Ansible automation | [ansible/](ansible) | `make ansible-check`, `make ansible-run` | Syntax checks and bootstrap workflow |
+| Lambda packaging | [lambdas/](lambdas) | `make lambda-package` | Multi-runtime artifacts under `dist/lambdas/` |
+| GitHub Actions CI | [.github/workflows/ci.yml](.github/workflows/ci.yml) | Push / PR validation | Split `validate` and `integration` jobs |
+| Azure DevOps pipeline | [azure-pipelines.yml](azure-pipelines.yml) | Push / PR validation | Matching validation and integration stages |
+| Smoke and validation workflows | [scripts/](scripts) | `make validate`, `make smoke`, `make lambda-smoke` | Bash-driven contract checks |
+
+## Runtime Coverage
+
+<p align="center">
+  <img src="assets/readme/runtime-matrix.svg" alt="runtime coverage overview" width="100%" />
+</p>
+
+| Workload | Runtime | Location | Default local path | Routed path | Kubernetes path | LocalStack status |
+| --- | --- | --- | --- | --- | --- | --- |
+| Application service | Node.js / TypeScript | `apps/node-ts` | `127.0.0.1:3007` | `:8085/api/node/*` | Yes | Not applicable |
+| Application service | Go | `apps/go` | `127.0.0.1:3008` | `:8085/api/go/*` | Yes | Not applicable |
+| Application service | Java | `apps/java` | `127.0.0.1:3009` | `:8086/java/*`, `:8085/legacy/java/*` | Yes | Not applicable |
+| Application service | PHP | `apps/php` | `127.0.0.1:3010` | `:8086/php/*`, `:8085/legacy/php/*` | Yes | Not applicable |
+| Lambda package | Node.js / TypeScript | `lambdas/node-ts` | `dist/lambdas/node-ts/function.zip` | Not applicable | Not applicable | Deployed and invoked |
+| Lambda package | Go | `lambdas/go` | `dist/lambdas/go/function.zip` | Not applicable | Not applicable | Packaged only |
+| Lambda package | Java | `lambdas/java` | `dist/lambdas/java/function.zip` | Not applicable | Not applicable | Deployed and invoked |
+| Lambda package | PHP | `lambdas/php` | `dist/lambdas/php/function.zip` | Not applicable | Not applicable | Packaged with local handler validation |
+
+## Local Workflow
+
+### Quick Start
 
 ```bash
 make bootstrap
@@ -66,132 +96,96 @@ make tf-apply-localstack
 make lambda-smoke
 ```
 
-Shut the platform down with:
+### Core Operator Targets
 
-```bash
-make down
-```
+| Target | Purpose |
+| --- | --- |
+| `make validate` | Full repository validation suite without starting the runtime stack |
+| `make up` | Build and start the Compose platform |
+| `make smoke` | Verify direct services, routed services, and proxy diagnostics |
+| `make k8s-validate` | Render and validate the local Kubernetes overlay |
+| `make tf-validate` | Validate the executable LocalStack Terraform stack |
+| `make tf-apply-localstack` | Apply the LocalStack Terraform stack |
+| `make ansible-run` | Execute workspace bootstrap and repository contract checks |
+| `make clean` | Remove generated artifacts and temporary state |
 
-## Operator commands
+### Validation Flow
 
 ```bash
 make validate
-make docker-validate
-make lint
-make k8s-validate
-make tf-init
-make tf-validate
-make ansible-check
-make lambda-package
+make up
+make smoke
+make tf-apply-localstack
 make lambda-smoke
+make down
 ```
 
-## Reverse proxy model
-
-- Nginx is the primary edge layer. It owns `/api/node/`, `/api/go/`, `/legacy/`, and `/diagnostics/apache-status`.
-- Apache owns `/php/`, `/java/`, `/legacy/php/`, `/legacy/java/`, and `/server-status`.
-- Direct service ports stay published only on loopback for diagnostics, smoke tests, and local comparison.
-
-## Kubernetes path
-
-`k8s/base` defines the namespace, shared config, four deployments, four services, and an ingress resource. `k8s/overlays/local` is the default local overlay. `k8s/kind/cluster.yaml` defines the kind cluster shape and ingress-facing host ports.
-
-Validation does not require a live cluster:
-
-```bash
-make k8s-validate
-```
-
-For a live local cluster:
-
-```bash
-bash ./scripts/kind-bootstrap.sh
-make k8s-apply
-```
-
-## Terraform path
-
-`infra/terraform/localstack` is the executable stack. It creates the LocalStack IAM role, deploys Node and Java Lambda functions, and exposes packaged Go and PHP artifacts as outputs for follow-on work.
-
-The cloud-specific directories are intentionally honest reference layouts:
-
-- `infra/terraform/aws`
-- `infra/terraform/azure`
-- `infra/terraform/gcp`
-
-They preserve provider, variable, and naming conventions without pretending that the repository provisions paid environments by default.
-
-## Ansible path
-
-Ansible handles workspace bootstrap and repository contract checks through:
-
-- `ansible/playbooks/bootstrap.yml`
-- `ansible/playbooks/validate.yml`
-
-The repository uses a containerized Ansible runner fallback when a local `ansible-playbook` binary is unavailable.
-
-## LocalStack and Lambda path
-
-`make lambda-package` builds all four Lambda artifacts locally:
-
-- Node.js/TypeScript
-- Go
-- Java
-- PHP custom-runtime bundle
-
-`make tf-apply-localstack` deploys the Node and Java functions to LocalStack and keeps the Go and PHP packages available as packaged-only artifacts. `make lambda-smoke` invokes the deployed Node and Java functions and validates the local PHP handler contract.
+The repository is designed so the local operator flow and the CI flow follow the same sequence and the same control scripts.
 
 ## CI/CD
 
-GitHub Actions and Azure DevOps both run the same local-first validation flow:
+<p align="center">
+  <img src="assets/readme/pipeline-flow.svg" alt="pipeline flow diagram" width="100%" />
+</p>
 
-- repository validation
-- Lambda packaging
-- Terraform validation
-- Kubernetes manifest rendering
-- Compose startup
-- proxy and service smoke tests
-- LocalStack Terraform apply
-- LocalStack Lambda smoke tests
+The repository uses two CI definitions with matching intent:
 
-## Repository structure
+| System | Role | What it validates |
+| --- | --- | --- |
+| GitHub Actions | Default repository validation and integration flow for PRs and pushes | `make validate`, Compose startup, smoke checks, LocalStack Terraform apply, Lambda smoke |
+| Azure DevOps | Equivalent validation path in a second delivery system | Static validation stage plus Compose and LocalStack integration stage |
 
-- `apps/` runtime services
-- `ansible/` inventory, group variables, and playbooks
-- `docker/` proxy and runner definitions
-- `docs/` architecture, topology, workflows, runbooks, and boundaries
-- `infra/localstack/` LocalStack ready hooks
-- `infra/terraform/` executable and reference Terraform layouts
-- `k8s/` Kubernetes base, overlay, and kind assets
-- `lambdas/` multi-runtime Lambda source code
-- `scripts/` Bash automation
+Neither pipeline deploys to AWS, Azure, GCP, or a managed Kubernetes platform. Both pipelines stand up an ephemeral local platform inside the CI runner, validate it, and tear it back down.
 
-## Scope boundaries
+## Repository Structure
 
-- The repository is local-first and portfolio-oriented.
-- LocalStack replaces paid AWS infrastructure for the executable serverless path.
-- The AWS, Azure, and GCP Terraform directories are reference architectures, not claimed live environments.
-- Node and Java Lambda functions are part of the default LocalStack smoke flow.
-- Go and PHP Lambda artifacts are packaged and validated locally; they are intentionally kept outside the default LocalStack invoke path to avoid flaky runtime behavior on this host profile.
+```text
+.
+|-- apps/                  # Node.js, Go, Java, and PHP demo services
+|-- ansible/               # Inventory, variables, bootstrap, and validation playbooks
+|-- assets/readme/         # README SVG assets and diagrams
+|-- docker/                # Nginx and Apache configuration
+|-- docs/                  # Architecture, workflows, topology, runbooks, boundaries
+|-- infra/localstack/      # LocalStack ready hooks
+|-- infra/terraform/       # Executable LocalStack stack and cloud reference layouts
+|-- k8s/                   # Base manifests, local overlay, and kind cluster config
+|-- lambdas/               # Multi-runtime Lambda sources
+|-- scripts/               # Bash automation and validation entrypoints
+|-- .github/workflows/     # GitHub Actions validation flow
+|-- azure-pipelines.yml    # Azure DevOps validation flow
+|-- docker-compose.yml     # Local runtime topology
+`-- Makefile               # Primary operator interface
+```
 
-## Future improvements
+## Docs Map
 
-- Add kubeconform or policy-as-code validation for the Kubernetes overlay
+| Document | Focus |
+| --- | --- |
+| [docs/quickstart.md](docs/quickstart.md) | Fast local bring-up and validation path |
+| [docs/architecture.md](docs/architecture.md) | Core design decisions and platform boundaries |
+| [docs/topology.md](docs/topology.md) | Service map, route ownership, and exposed surfaces |
+| [docs/reverse-proxy.md](docs/reverse-proxy.md) | Nginx and Apache routing model |
+| [docs/deployment-flow.md](docs/deployment-flow.md) | Local runtime, LocalStack, Kubernetes, and CI flows |
+| [docs/kubernetes.md](docs/kubernetes.md) | kind-oriented Kubernetes structure and commands |
+| [docs/terraform.md](docs/terraform.md) | Executable LocalStack Terraform path and reference layouts |
+| [docs/ansible.md](docs/ansible.md) | Bootstrap automation and repository contract checks |
+| [docs/localstack-lambda.md](docs/localstack-lambda.md) | Lambda packaging and LocalStack deployment model |
+| [docs/ci-cd.md](docs/ci-cd.md) | GitHub Actions and Azure DevOps roles |
+| [docs/runbooks.md](docs/runbooks.md) | Operational troubleshooting commands |
+| [docs/security.md](docs/security.md) | Local-first security posture and handling rules |
+| [docs/roadmap.md](docs/roadmap.md) | Realistic next improvements |
+
+## Scope Boundaries
+
+- The repository is local-first and portfolio-oriented by design.
+- LocalStack is the executable serverless path; it replaces paid AWS resources for the default workflow.
+- The AWS, Azure, and GCP Terraform directories are reference layouts, not claimed live environments.
+- Kubernetes support is aimed at kind and local manifest review, not managed-cluster operations.
+- The default LocalStack invoke path covers Node and Java. Go and PHP stay in the packaging story without claiming a wider runtime matrix than the local environment reliably supports.
+
+## Future Improvements
+
+- Add policy validation for Terraform and Kubernetes resources
 - Add image signing and SBOM generation to the CI flow
-- Extend the packaged-only Go and PHP Lambda artifacts into alternative LocalStack execution paths when the host runtime is known-good
-
-## Documentation
-
-- [architecture.md](docs/architecture.md)
-- [topology.md](docs/topology.md)
-- [quickstart.md](docs/quickstart.md)
-- [reverse-proxy.md](docs/reverse-proxy.md)
-- [deployment-flow.md](docs/deployment-flow.md)
-- [kubernetes.md](docs/kubernetes.md)
-- [terraform.md](docs/terraform.md)
-- [ansible.md](docs/ansible.md)
-- [localstack-lambda.md](docs/localstack-lambda.md)
-- [ci-cd.md](docs/ci-cd.md)
-- [runbooks.md](docs/runbooks.md)
-- [security.md](docs/security.md)
-- [roadmap.md](docs/roadmap.md)
+- Add optional host-specific execution profiles for the packaged-only Go and PHP Lambda artifacts
+- Add lightweight observability examples that remain local-first

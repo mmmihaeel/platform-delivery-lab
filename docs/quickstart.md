@@ -2,14 +2,14 @@
 
 ## Prerequisites
 
-- Docker Desktop or an equivalent Docker engine
+- Docker Desktop or another Docker engine with Compose support
 - Bash
 - Make
 - Terraform
-- `kubectl`
-- `kind` for the live Kubernetes path
+- `kubectl` for manifest rendering or cluster inspection
+- `kind` only if you want to exercise the live Kubernetes path
 
-## First successful run
+## Five-minute path
 
 ```bash
 make bootstrap
@@ -20,10 +20,11 @@ make smoke
 Expected result:
 
 - all service containers are healthy
-- Nginx and Apache routes respond
+- Nginx and Apache health endpoints respond
+- direct and proxied status endpoints return the expected service metadata
 - LocalStack health is reachable
 
-## Lambda workflow
+## Lambda path
 
 ```bash
 make lambda-package
@@ -33,13 +34,20 @@ make lambda-smoke
 
 Expected result:
 
-- all Lambda packages are written to `dist/lambdas/`
-- Terraform deploys the LocalStack stack
-- Node and Java functions invoke successfully
-- the local PHP handler contract is validated
+- all Lambda artifacts are written under `dist/lambdas/`
+- the LocalStack Terraform stack applies successfully
+- Node and Java Lambda functions invoke successfully
+- the local PHP handler contract validates successfully
 
-## Tear down
+## Clean shutdown
 
 ```bash
 make down
 ```
+
+## Next documents
+
+- [architecture.md](architecture.md)
+- [reverse-proxy.md](reverse-proxy.md)
+- [terraform.md](terraform.md)
+- [runbooks.md](runbooks.md)

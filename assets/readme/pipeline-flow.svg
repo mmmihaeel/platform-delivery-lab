@@ -1,0 +1,33 @@
+<svg width="1280" height="420" viewBox="0 0 1280 420" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="420" rx="28" fill="#0B1220"/>
+  <rect x="24" y="24" width="1232" height="372" rx="22" fill="#111827" stroke="#334155"/>
+  <text x="56" y="74" fill="#F8FAFC" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700">Pipeline flow</text>
+  <text x="56" y="104" fill="#94A3B8" font-family="Segoe UI, Arial, sans-serif" font-size="16">GitHub Actions and Azure DevOps mirror the same local-first validation story.</text>
+
+  <rect x="72" y="152" width="274" height="180" rx="18" fill="#0F172A" stroke="#1D4ED8"/>
+  <text x="110" y="188" fill="#F8FAFC" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">1. Validate</text>
+  <text x="110" y="222" fill="#93C5FD" font-family="Segoe UI, Arial, sans-serif" font-size="15">make validate</text>
+  <text x="110" y="252" fill="#CBD5E1" font-family="Segoe UI, Arial, sans-serif" font-size="14">Lint</text>
+  <text x="110" y="274" fill="#CBD5E1" font-family="Segoe UI, Arial, sans-serif" font-size="14">Compose config check</text>
+  <text x="110" y="296" fill="#CBD5E1" font-family="Segoe UI, Arial, sans-serif" font-size="14">Lambda packaging</text>
+  <text x="110" y="318" fill="#CBD5E1" font-family="Segoe UI, Arial, sans-serif" font-size="14">Terraform validate</text>
+
+  <rect x="502" y="152" width="274" height="180" rx="18" fill="#0F172A" stroke="#0F766E"/>
+  <text x="532" y="188" fill="#F8FAFC" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">2. Integrate</text>
+  <text x="532" y="222" fill="#99F6E4" font-family="Segoe UI, Arial, sans-serif" font-size="15">make up</text>
+  <text x="532" y="244" fill="#99F6E4" font-family="Segoe UI, Arial, sans-serif" font-size="15">make smoke</text>
+  <text x="532" y="266" fill="#99F6E4" font-family="Segoe UI, Arial, sans-serif" font-size="15">make tf-apply-localstack</text>
+  <text x="532" y="288" fill="#99F6E4" font-family="Segoe UI, Arial, sans-serif" font-size="15">make lambda-smoke</text>
+  <text x="532" y="320" fill="#CBD5E1" font-family="Segoe UI, Arial, sans-serif" font-size="14">Ephemeral Docker stack on the runner</text>
+
+  <rect x="932" y="152" width="274" height="180" rx="18" fill="#0F172A" stroke="#7C2D12"/>
+  <text x="968" y="188" fill="#F8FAFC" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">3. Tear down</text>
+  <text x="968" y="222" fill="#FED7AA" font-family="Segoe UI, Arial, sans-serif" font-size="15">make down</text>
+  <text x="968" y="254" fill="#CBD5E1" font-family="Segoe UI, Arial, sans-serif" font-size="14">Remove containers, network, and volumes.</text>
+  <text x="968" y="276" fill="#CBD5E1" font-family="Segoe UI, Arial, sans-serif" font-size="14">No external deployment target remains.</text>
+
+  <path d="M346 242H502" stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+  <path d="M776 242H932" stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+
+  <text x="72" y="368" fill="#64748B" font-family="Segoe UI, Arial, sans-serif" font-size="14">The pipeline validates parity between workstation commands and CI execution instead of branching into a separate deployment script.</text>
+</svg>
